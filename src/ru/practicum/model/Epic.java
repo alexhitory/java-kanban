@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Epic extends Task {
 
-    private final List<Integer> subtaskIds = new ArrayList<>(); // храним ID подзадач
+    private final List<Integer> subtaskIds = new ArrayList<>();
 
     public Epic(String title, String description) {
         super(title, description, Status.NEW);
@@ -16,8 +16,11 @@ public class Epic extends Task {
     }
 
     public void addSubtask(int subtaskId) {
-        subtaskIds.add(subtaskId);
+        if (subtaskId != this.getId()) { // нельзя добавить самого себя
+            subtaskIds.add(subtaskId);
+        }
     }
+
 
     public void removeSubtask(int subtaskId) {
         subtaskIds.remove((Integer) subtaskId);
