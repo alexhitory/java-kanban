@@ -1,12 +1,19 @@
+package ru.practicum.manager;
+
+import ru.practicum.model.Status;
+import ru.practicum.model.Epic;
+import ru.practicum.model.Subtask;
+import ru.practicum.model.Task;
+
 import java.util.*;
 
 public class TaskManager {
 
     private int nextId = 1; // генератор уникальных id
 
-    private Map<Integer, Task> tasks = new HashMap<>();
-    private Map<Integer, Epic> epics = new HashMap<>();
-    private Map<Integer, Subtask> subtasks = new HashMap<>();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, Subtask> subtasks = new HashMap<>();
 
     // ===== Создание задач =====
     public Task createTask(Task task) {
@@ -22,17 +29,21 @@ public class TaskManager {
     }
 
     public Subtask createSubtask(Subtask subtask) {
+        Epic epic = epics.get(subtask.getEpicId());
+
+        if (epic == null) {
+            return null;
+        }
+
         subtask.setId(nextId++);
         subtasks.put(subtask.getId(), subtask);
 
-        Epic epic = epics.get(subtask.getEpicId());
-        if (epic != null) {
-            epic.addSubtask(subtask.getId());
-            updateEpicStatus(epic);
-        }
+        epic.addSubtask(subtask.getId());
+        updateEpicStatus(epic);
 
         return subtask;
     }
+
 
     // ===== Получение всех задач =====
     public List<Task> getAllTasks() {
@@ -71,10 +82,12 @@ public class TaskManager {
     }
 
     public void removeAllSubtasks() {
+        subtasks.clear();
+
         for (Epic epic : epics.values()) {
             epic.getSubtaskIds().clear();
+            updateEpicStatus(epic);
         }
-        subtasks.clear();
     }
 
     // ===== Удаление по id =====

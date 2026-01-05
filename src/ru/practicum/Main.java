@@ -1,3 +1,11 @@
+package ru.practicum;
+
+import ru.practicum.manager.TaskManager;
+import ru.practicum.model.Epic;
+import ru.practicum.model.Status;
+import ru.practicum.model.Subtask;
+import ru.practicum.model.Task;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -57,18 +65,18 @@ public class Main {
         System.out.println("\n=== Статусы после изменений ===");
 
         for (Task task : manager.getAllTasks()) {
-            System.out.println("Task " + task.getId() +
+            System.out.println("ru.practicum.model.Task " + task.getId() +
                     " (" + task.getTitle() + "): " + task.getStatus());
         }
 
         for (Epic epic : manager.getAllEpics()) {
-            System.out.println("Epic " + epic.getId() +
+            System.out.println("ru.practicum.model.Epic " + epic.getId() +
                     " (" + epic.getTitle() + "): " + epic.getStatus() +
                     ", подзадач: " + epic.getSubtaskIds().size());
         }
 
         for (Subtask subtask : manager.getAllSubtasks()) {
-            System.out.println("Subtask " + subtask.getId() +
+            System.out.println("ru.practicum.model.Subtask " + subtask.getId() +
                     " (" + subtask.getTitle() + "): " + subtask.getStatus() +
                     ", epicId=" + subtask.getEpicId());
         }
