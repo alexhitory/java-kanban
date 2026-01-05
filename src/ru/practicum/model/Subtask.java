@@ -14,8 +14,11 @@ public class Subtask extends Task {
     }
 
     public void setEpicId(int epicId) {
-        this.epicId = epicId;
+        if (epicId != this.getId()) { // нельзя быть своим эпиком
+            this.epicId = epicId;
+        }
     }
+
 
     @Override
     public String toString() {
