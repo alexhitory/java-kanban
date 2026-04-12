@@ -22,8 +22,8 @@ public interface TaskManager {
 
     // ===== Получение по ID =====
     Task getTaskById(int id);
-    void getEpicById(int id);
-    void getSubtaskById(int id);
+    Epic getEpicById(int id);
+    Subtask getSubtaskById(int id);
 
     // ===== Удаление всех задач =====
     void removeAllTasks();

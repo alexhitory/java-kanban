@@ -1,9 +1,7 @@
-package ru.practicum.Test;
+package ru.practicum.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.manager.Managers;
-import ru.practicum.manager.TaskManager;
 import ru.practicum.model.*;
 
 import java.util.List;
