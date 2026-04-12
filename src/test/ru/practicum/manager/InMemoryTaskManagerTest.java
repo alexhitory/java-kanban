@@ -2,7 +2,10 @@ package ru.practicum.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.model.*;
+import ru.practicum.model.Status;
+import ru.practicum.model.Task;
+import ru.practicum.model.Epic;
+import ru.practicum.model.Subtask;
 
 import java.util.List;
 
@@ -13,60 +16,145 @@ class InMemoryTaskManagerTest {
     private TaskManager manager;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         manager = Managers.getDefault();
     }
 
     @Test
-    void createAndGetTask() {
-        Task task = new Task("Task1", "Desc", Status.NEW);
-        manager.createTask(task);
+    void shouldNotBeAffectedByExternalChangesAfterCreation() {
+        Task task = new Task("t", "d", Status.NEW);
 
-        Task retrieved = manager.getTaskById(task.getId());
-        assertEquals(task, retrieved, "Созданная и полученная задачи должны совпадать");
+        Task created = manager.createTask(task);
 
-        List<Task> tasks = manager.getAllTasks();
-        assertEquals(1, tasks.size(), "Должна быть одна задача");
+        task.setTitle("HACKED");
+        task.setStatus(Status.DONE);
+
+        Task stored = manager.getTaskById(created.getId());
+
+        assertEquals("t", stored.getTitle());
+        assertEquals(Status.NEW, stored.getStatus());
     }
 
     @Test
-    void createEpicAndSubtasks() {
-        Epic epic = manager.createEpic(new Epic("Epic", "Big"));
-        Subtask sub1 = manager.createSubtask(new Subtask("Sub1", "D1", Status.NEW, epic.getId()));
-        Subtask sub2 = manager.createSubtask(new Subtask("Sub2", "D2", Status.NEW, epic.getId()));
-
-        List<Subtask> subs = manager.getSubtasksOfEpic(epic.getId());
-        assertEquals(2, subs.size(), "Должны вернуться две подзадачи");
-
-        assertEquals(Status.NEW, epic.getStatus(), "Эпик с NEW подзадачами должен быть NEW");
-
-        sub1.setStatus(Status.DONE);
-        manager.updateSubtask(sub1);
-        sub2.setStatus(Status.DONE);
-        manager.updateSubtask(sub2);
-
-        assertEquals(Status.DONE, epic.getStatus(), "Эпик с DONE подзадачами должен быть DONE");
-    }
-
-    @Test
-    void historyManagerTracksTasks() {
-        Task task = manager.createTask(new Task("Task", "Desc", Status.NEW));
-        Epic epic = manager.createEpic(new Epic("Epic", "Desc"));
-        Subtask subtask = manager.createSubtask(new Subtask("Sub", "D", Status.NEW, epic.getId()));
+    void historyShouldNotBeAffectedByExternalChanges() {
+        Task task = manager.createTask(new Task("t", "d", Status.NEW));
 
         manager.getTaskById(task.getId());
-        manager.getEpicById(epic.getId());
-        manager.getSubtaskById(subtask.getId());
-        manager.getTaskById(task.getId()); // повторный просмотр
 
-        List<Task> history = manager.getHistory();
-        assertEquals(4, history.size(), "История должна содержать все просмотры, включая дубликаты");
+        task.setTitle("MODIFIED");
+        task.setStatus(Status.DONE);
+
+        Task fromHistory = manager.getHistory().get(0);
+
+        assertEquals("t", fromHistory.getTitle());
+        assertEquals(Status.NEW, fromHistory.getStatus());
     }
 
     @Test
-    void removeTaskRemovesItFromManager() {
-        Task task = manager.createTask(new Task("Task", "Desc", Status.NEW));
-        manager.removeTaskById(task.getId());
-        assertNull(manager.getTaskById(task.getId()), "Удалённая задача не должна возвращаться");
+    void modifyingObjectFromHistoryShouldNotAffectManager() {
+        Task task = manager.createTask(new Task("t", "d", Status.NEW));
+
+        manager.getTaskById(task.getId());
+
+        Task fromHistory = manager.getHistory().get(0);
+
+        fromHistory.setTitle("BROKEN");
+        fromHistory.setStatus(Status.DONE);
+
+        Task stored = manager.getTaskById(task.getId());
+
+        assertEquals("t", stored.getTitle());
+        assertEquals(Status.NEW, stored.getStatus());
+    }
+
+    @Test
+    void shouldNotLeaveDanglingSubtaskIdsInEpic() {
+        Epic epic = manager.createEpic(new Epic("e", "d"));
+
+        Subtask sub = manager.createSubtask(
+                new Subtask("s", "d", Status.NEW, epic.getId())
+        );
+
+        manager.removeSubtaskById(sub.getId());
+
+        Epic updated = manager.getEpicById(epic.getId());
+
+        assertFalse(updated.getSubtaskIds().contains(sub.getId()));
+    }
+
+    @Test
+    void epicShouldHaveNoBrokenSubtaskReferencesAfterDeletion() {
+        Epic epic = manager.createEpic(new Epic("e", "d"));
+
+        Subtask s1 = manager.createSubtask(new Subtask("s1", "d", Status.NEW, epic.getId()));
+        Subtask s2 = manager.createSubtask(new Subtask("s2", "d", Status.NEW, epic.getId()));
+
+        manager.removeEpicById(epic.getId());
+
+        assertTrue(manager.getAllSubtasks().isEmpty());
+    }
+
+    @Test
+    void removeAllTasksShouldClearHistoryAndData() {
+        Task t1 = manager.createTask(new Task("t1", "d", Status.NEW));
+        manager.getTaskById(t1.getId());
+
+        manager.removeAllTasks();
+
+        assertTrue(manager.getAllTasks().isEmpty());
+        assertTrue(manager.getHistory().isEmpty());
+    }
+
+    @Test
+    void removeAllEpicsShouldClearSubtasksAndHistory() {
+        Epic epic = manager.createEpic(new Epic("e", "d"));
+
+        Subtask s = manager.createSubtask(
+                new Subtask("s", "d", Status.NEW, epic.getId())
+        );
+
+        manager.getEpicById(epic.getId());
+        manager.getSubtaskById(s.getId());
+
+        manager.removeAllEpics();
+
+        assertTrue(manager.getAllEpics().isEmpty());
+        assertTrue(manager.getAllSubtasks().isEmpty());
+        assertTrue(manager.getHistory().isEmpty());
+    }
+
+    @Test
+    void getAllTasksShouldReturnCopyNotInternalList() {
+        Task t = manager.createTask(new Task("t", "d", Status.NEW));
+
+        List<Task> list = manager.getAllTasks();
+        list.clear();
+
+        assertFalse(manager.getAllTasks().isEmpty());
+    }
+
+    @Test
+    void getHistoryShouldReturnCopyNotInternalStructure() {
+        Task t = manager.createTask(new Task("t", "d", Status.NEW));
+
+        manager.getTaskById(t.getId());
+
+        List<Task> history = manager.getHistory();
+        history.clear();
+
+        assertFalse(manager.getHistory().isEmpty());
+    }
+
+    @Test
+    void epicStatusShouldRecalculateCorrectly() {
+        Epic epic = manager.createEpic(new Epic("e", "d"));
+
+        Subtask s1 = manager.createSubtask(new Subtask("s1", "d", Status.NEW, epic.getId()));
+        Subtask s2 = manager.createSubtask(new Subtask("s2", "d", Status.NEW, epic.getId()));
+
+        s1.setStatus(Status.DONE);
+        manager.updateSubtask(s1);
+
+        assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
 }

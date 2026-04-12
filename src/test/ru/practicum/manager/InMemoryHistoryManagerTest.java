@@ -12,32 +12,109 @@ import static org.junit.jupiter.api.Assertions.*;
 class InMemoryHistoryManagerTest {
 
     private HistoryManager historyManager;
-    private Task task;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         historyManager = new InMemoryHistoryManager();
-        task = new Task("Task", "Desc", Status.NEW);
+    }
+
+    @Test
+    void shouldAddTasksInOrder() {
+        Task t1 = new Task("1", "d1", Status.NEW);
+        t1.setId(1);
+
+        Task t2 = new Task("2", "d2", Status.NEW);
+        t2.setId(2);
+
+        historyManager.add(t1);
+        historyManager.add(t2);
+
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals(2, history.size());
+        assertEquals(1, history.get(0).getId());
+        assertEquals(2, history.get(1).getId());
+    }
+
+    @Test
+    void shouldRemoveDuplicatesAndKeepLast() {
+        Task t = new Task("1", "d1", Status.NEW);
+        t.setId(1);
+
+        historyManager.add(t);
+        historyManager.add(t);
+        historyManager.add(t);
+
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals(1, history.size());
+        assertEquals(1, history.get(0).getId());
+    }
+
+    @Test
+    void shouldMoveTaskToEndWhenAddedAgain() {
+        Task t1 = new Task("1", "d", Status.NEW);
+        t1.setId(1);
+
+        Task t2 = new Task("2", "d", Status.NEW);
+        t2.setId(2);
+
+        historyManager.add(t1);
+        historyManager.add(t2);
+        historyManager.add(t1);
+
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals(2, history.size());
+        assertEquals(2, history.get(0).getId());
+        assertEquals(1, history.get(1).getId());
+    }
+
+    @Test
+    void shouldRemoveElement() {
+        Task t = new Task("1", "d", Status.NEW);
+        t.setId(1);
+
+        historyManager.add(t);
+        historyManager.remove(1);
+
+        assertTrue(historyManager.getHistory().isEmpty());
+    }
+
+    @Test
+    void shouldIgnoreNullTask() {
+        historyManager.add(null);
+        assertTrue(historyManager.getHistory().isEmpty());
+    }
+
+    @Test
+    void historyShouldNotChangeIfTaskIsModifiedExternally() {
+        Task task = new Task("Task", "Desc", Status.NEW);
         task.setId(1);
-    }
 
-    @Test
-    void addAndRetrieveHistory() {
         historyManager.add(task);
-        List<Task> history = historyManager.getHistory();
-        assertEquals(1, history.size(), "История должна содержать добавленную задачу");
-        assertEquals(task, history.get(0), "Задача в истории должна совпадать с добавленной");
+
+        task.setTitle("HACKED");
+        task.setStatus(Status.DONE);
+
+        Task fromHistory = historyManager.getHistory().get(0);
+
+        assertEquals("Task", fromHistory.getTitle());
+        assertEquals(Status.NEW, fromHistory.getStatus());
     }
 
     @Test
-    void historyLimitIsRespected() {
-        for (int i = 1; i <= 15; i++) {
-            Task t = new Task("Task" + i, "Desc", Status.NEW);
-            t.setId(i);
-            historyManager.add(t);
-        }
-        List<Task> history = historyManager.getHistory();
-        assertEquals(10, history.size(), "История не должна превышать лимит в 10 задач");
-        assertEquals(6, history.get(0).getId(), "Старые задачи удаляются при переполнении");
+    void shouldNotCreateDuplicatesInHistory() {
+        Task t = new Task("1", "d", Status.NEW);
+        t.setId(1);
+
+        historyManager.add(t);
+        historyManager.add(t);
+
+        long count = historyManager.getHistory().stream()
+                .filter(task -> task.getId() == 1)
+                .count();
+
+        assertEquals(1, count);
     }
 }
