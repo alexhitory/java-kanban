@@ -14,7 +14,7 @@ public class Subtask extends Task {
     }
 
     public void setEpicId(int epicId) {
-        if (epicId != this.getId()) { // нельзя быть своим эпиком
+        if (epicId != this.id) {
             this.epicId = epicId;
         }
     }

@@ -1,9 +1,7 @@
-package ru.practicum.Test;
+package ru.practicum.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.manager.HistoryManager;
-import ru.practicum.manager.InMemoryHistoryManager;
 import ru.practicum.model.Status;
 import ru.practicum.model.Task;
 
