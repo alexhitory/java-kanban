@@ -12,32 +12,44 @@ public interface TaskManager {
 
     // ===== Создание задач =====
     Task createTask(Task task);
+
     Epic createEpic(Epic epic);
+
     Subtask createSubtask(Subtask subtask);
 
     // ===== Получение всех задач =====
     List<Task> getAllTasks();
+
     List<Epic> getAllEpics();
+
     List<Subtask> getAllSubtasks();
 
     // ===== Получение по ID =====
     Task getTaskById(int id);
+
     Epic getEpicById(int id);
+
     Subtask getSubtaskById(int id);
 
     // ===== Удаление всех задач =====
     void removeAllTasks();
+
     void removeAllEpics();
+
     void removeAllSubtasks();
 
     // ===== Удаление по ID =====
     void removeTaskById(int id);
+
     void removeEpicById(int id);
+
     void removeSubtaskById(int id);
 
     // ===== Обновление задач =====
     void updateTask(Task task);
+
     void updateEpic(Epic epic);
+
     void updateSubtask(Subtask subtask);
 
     // ===== Получение подзадач определённого эпика =====
