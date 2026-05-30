@@ -11,9 +11,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     private final HistoryManager historyManager;
     private int nextId = 1;
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, Epic> epics = new HashMap<>();
-    private final Map<Integer, Subtask> subtasks = new HashMap<>();
+    protected final Map<Integer, Task> tasks = new HashMap<>();
+    protected final Map<Integer, Epic> epics = new HashMap<>();
+    protected final Map<Integer, Subtask> subtasks = new HashMap<>();
 
     public InMemoryTaskManager() {
         this.historyManager = Managers.getDefaultHistory();
@@ -39,7 +39,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    private Task copyTask(Task task) {
+    protected Task copyTask(Task task) {
         if (task instanceof Epic) {
             return copyEpic((Epic) task);
         }
@@ -51,7 +51,7 @@ public class InMemoryTaskManager implements TaskManager {
         return copy;
     }
 
-    private Epic copyEpic(Epic epic) {
+    protected Epic copyEpic(Epic epic) {
         Epic copy = new Epic(epic.getTitle(), epic.getDescription());
         copy.setId(epic.getId());
         copy.setStatus(epic.getStatus());
@@ -61,7 +61,7 @@ public class InMemoryTaskManager implements TaskManager {
         return copy;
     }
 
-    private Subtask copySubtask(Subtask subtask) {
+    protected Subtask copySubtask(Subtask subtask) {
         Subtask copy = new Subtask(
                 subtask.getTitle(),
                 subtask.getDescription(),
@@ -80,6 +80,35 @@ public class InMemoryTaskManager implements TaskManager {
         stored.setId(nextId++);
         tasks.put(stored.getId(), stored);
         return stored;
+    }
+
+    protected void restoreTask(Task task) {
+        Task stored = copyTask(task);
+        tasks.put(stored.getId(), stored);
+        updateNextId(stored.getId());
+    }
+
+    protected void restoreEpic(Epic epic) {
+        Epic stored = copyEpic(epic);
+        epics.put(stored.getId(), stored);
+        updateNextId(stored.getId());
+    }
+
+    protected void restoreSubtask(Subtask subtask) {
+        Subtask stored = copySubtask(subtask);
+        subtasks.put(stored.getId(), stored);
+
+        Epic epic = epics.get(stored.getEpicId());
+        if (epic != null) {
+            epic.addSubtask(stored.getId());
+            updateEpicStatus(epic);
+        }
+
+        updateNextId(stored.getId());
+    }
+
+    private void updateNextId(int restoredId) {
+        nextId = Math.max(nextId, restoredId + 1);
     }
 
     @Override
