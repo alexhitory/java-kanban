@@ -97,6 +97,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             for (Integer id : epic.getSubtaskIds()) {
                 copy.addSubtask(id);
             }
+            copy.setCalculatedTime(epic.getDuration(), epic.getStartTime(), epic.getEndTime());
             return copy;
         } else if (task instanceof Subtask) {
             Subtask subtask = (Subtask) task;
@@ -104,12 +105,20 @@ public class InMemoryHistoryManager implements HistoryManager {
                     subtask.getTitle(),
                     subtask.getDescription(),
                     subtask.getStatus(),
-                    subtask.getEpicId()
+                    subtask.getEpicId(),
+                    subtask.getDuration(),
+                    subtask.getStartTime()
             );
             copy.setId(subtask.getId());
             return copy;
         } else {
-            Task copy = new Task(task.getTitle(), task.getDescription(), task.getStatus());
+            Task copy = new Task(
+                    task.getTitle(),
+                    task.getDescription(),
+                    task.getStatus(),
+                    task.getDuration(),
+                    task.getStartTime()
+            );
             copy.setId(task.getId());
             return copy;
         }

@@ -82,6 +82,36 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
+    void shouldReturnEmptyHistory() {
+        assertTrue(historyManager.getHistory().isEmpty());
+    }
+
+    @Test
+    void shouldRemoveFromBeginningMiddleAndEnd() {
+        Task t1 = new Task("1", "d", Status.NEW);
+        t1.setId(1);
+        Task t2 = new Task("2", "d", Status.NEW);
+        t2.setId(2);
+        Task t3 = new Task("3", "d", Status.NEW);
+        t3.setId(3);
+
+        historyManager.add(t1);
+        historyManager.add(t2);
+        historyManager.add(t3);
+
+        historyManager.remove(1);
+        assertEquals(List.of(2, 3), historyManager.getHistory().stream().map(Task::getId).toList());
+
+        historyManager.remove(3);
+        assertEquals(List.of(2), historyManager.getHistory().stream().map(Task::getId).toList());
+
+        historyManager.add(t1);
+        historyManager.add(t3);
+        historyManager.remove(1);
+        assertEquals(List.of(2, 3), historyManager.getHistory().stream().map(Task::getId).toList());
+    }
+
+    @Test
     void shouldIgnoreNullTask() {
         historyManager.add(null);
         assertTrue(historyManager.getHistory().isEmpty());

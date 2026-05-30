@@ -1,5 +1,7 @@
 package ru.practicum.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -8,11 +10,19 @@ public class Task {
     protected String title;
     protected String description;
     protected Status status;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
     public Task(String title, String description, Status status) {
+        this(title, description, status, Duration.ZERO, null);
+    }
+
+    public Task(String title, String description, Status status, Duration duration, LocalDateTime startTime) {
         this.title = title;
         this.description = description;
         this.status = status;
+        this.duration = duration == null ? Duration.ZERO : duration;
+        this.startTime = startTime;
     }
 
     public int getId() {
@@ -47,6 +57,26 @@ public class Task {
         return TaskType.TASK;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration == null ? Duration.ZERO : duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime == null ? null : startTime.plus(duration);
+    }
+
     public void setStatus(Status status) {
         this.status = status;
     }
@@ -71,6 +101,8 @@ public class Task {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", duration=" + duration +
+                ", startTime=" + startTime +
                 '}';
     }
 

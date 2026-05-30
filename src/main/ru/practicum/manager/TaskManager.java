@@ -24,6 +24,8 @@ public interface TaskManager {
 
     List<Subtask> getAllSubtasks();
 
+    List<Task> getPrioritizedTasks();
+
     // ===== Получение по ID =====
     Task getTaskById(int id);
 
