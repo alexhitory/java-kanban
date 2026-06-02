@@ -11,9 +11,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryTaskManagerTest {
+class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     private TaskManager manager;
+
+    @Override
+    protected InMemoryTaskManager createManager() {
+        return new InMemoryTaskManager();
+    }
 
     @BeforeEach
     void setUp() {
@@ -155,6 +160,6 @@ class InMemoryTaskManagerTest {
         s1.setStatus(Status.DONE);
         manager.updateSubtask(s1);
 
-        assertEquals(Status.IN_PROGRESS, epic.getStatus());
+        assertEquals(Status.IN_PROGRESS, manager.getEpicById(epic.getId()).getStatus());
     }
 }
