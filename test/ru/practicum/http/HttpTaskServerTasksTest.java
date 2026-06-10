@@ -5,6 +5,7 @@ import ru.practicum.model.Status;
 import ru.practicum.model.Task;
 
 import java.net.http.HttpResponse;
+import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -18,8 +19,8 @@ class HttpTaskServerTasksTest extends HttpTaskServerTestBase {
         HttpResponse<String> createResponse = post("/tasks", gson.toJson(task));
         HttpResponse<String> getResponse = get("/tasks/1");
 
-        assertEquals(201, createResponse.statusCode());
-        assertEquals(200, getResponse.statusCode());
+        assertEquals(HttpURLConnection.HTTP_CREATED, createResponse.statusCode());
+        assertEquals(HttpURLConnection.HTTP_OK, getResponse.statusCode());
         assertEquals("Task", manager.getTaskById(1).getTitle());
     }
 
@@ -27,7 +28,7 @@ class HttpTaskServerTasksTest extends HttpTaskServerTestBase {
     void shouldReturnNotFoundForUnknownTask() throws Exception {
         HttpResponse<String> response = get("/tasks/999");
 
-        assertEquals(404, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.statusCode());
     }
 
     @Test
@@ -40,7 +41,7 @@ class HttpTaskServerTasksTest extends HttpTaskServerTestBase {
         post("/tasks", gson.toJson(first));
         HttpResponse<String> response = post("/tasks", gson.toJson(second));
 
-        assertEquals(406, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_NOT_ACCEPTABLE, response.statusCode());
     }
 
     @Test
@@ -49,7 +50,7 @@ class HttpTaskServerTasksTest extends HttpTaskServerTestBase {
 
         HttpResponse<String> response = delete("/tasks/1");
 
-        assertEquals(201, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode());
         assertEquals(0, manager.getAllTasks().size());
     }
 }

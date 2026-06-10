@@ -5,6 +5,7 @@ import ru.practicum.model.Status;
 import ru.practicum.model.Task;
 
 import java.net.http.HttpResponse;
+import java.net.HttpURLConnection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -16,7 +17,7 @@ class HttpTaskServerHistoryTest extends HttpTaskServerTestBase {
 
         HttpResponse<String> response = get("/history");
 
-        assertEquals(200, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
         assertEquals(1, manager.getHistory().size());
     }
 
@@ -24,6 +25,6 @@ class HttpTaskServerHistoryTest extends HttpTaskServerTestBase {
     void shouldReturnNotFoundForInvalidHistoryPath() throws Exception {
         HttpResponse<String> response = get("/history/1");
 
-        assertEquals(404, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.statusCode());
     }
 }

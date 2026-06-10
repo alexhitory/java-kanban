@@ -6,6 +6,7 @@ import ru.practicum.model.Status;
 import ru.practicum.model.Subtask;
 
 import java.net.http.HttpResponse;
+import java.net.HttpURLConnection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,8 +18,8 @@ class HttpTaskServerEpicsTest extends HttpTaskServerTestBase {
         HttpResponse<String> createResponse = post("/epics", gson.toJson(epic));
         HttpResponse<String> getResponse = get("/epics/1");
 
-        assertEquals(201, createResponse.statusCode());
-        assertEquals(200, getResponse.statusCode());
+        assertEquals(HttpURLConnection.HTTP_CREATED, createResponse.statusCode());
+        assertEquals(HttpURLConnection.HTTP_OK, getResponse.statusCode());
         assertEquals("Epic", manager.getEpicById(1).getTitle());
     }
 
@@ -29,7 +30,7 @@ class HttpTaskServerEpicsTest extends HttpTaskServerTestBase {
 
         HttpResponse<String> response = get("/epics/" + epic.getId() + "/subtasks");
 
-        assertEquals(200, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
         assertEquals(1, manager.getSubtasksOfEpic(epic.getId()).size());
     }
 
@@ -37,7 +38,7 @@ class HttpTaskServerEpicsTest extends HttpTaskServerTestBase {
     void shouldReturnNotFoundForUnknownEpic() throws Exception {
         HttpResponse<String> response = get("/epics/999");
 
-        assertEquals(404, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.statusCode());
     }
 
     @Test
@@ -47,7 +48,7 @@ class HttpTaskServerEpicsTest extends HttpTaskServerTestBase {
 
         HttpResponse<String> response = delete("/epics/" + epic.getId());
 
-        assertEquals(201, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode());
         assertEquals(0, manager.getAllEpics().size());
         assertEquals(0, manager.getAllSubtasks().size());
     }

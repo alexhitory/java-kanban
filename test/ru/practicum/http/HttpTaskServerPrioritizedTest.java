@@ -5,6 +5,7 @@ import ru.practicum.model.Status;
 import ru.practicum.model.Task;
 
 import java.net.http.HttpResponse;
+import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -20,7 +21,7 @@ class HttpTaskServerPrioritizedTest extends HttpTaskServerTestBase {
 
         HttpResponse<String> response = get("/prioritized");
 
-        assertEquals(200, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
         assertEquals(2, manager.getPrioritizedTasks().size());
         assertEquals("Early", manager.getPrioritizedTasks().get(0).getTitle());
     }
@@ -29,6 +30,6 @@ class HttpTaskServerPrioritizedTest extends HttpTaskServerTestBase {
     void shouldReturnNotFoundForInvalidPrioritizedPath() throws Exception {
         HttpResponse<String> response = get("/prioritized/1");
 
-        assertEquals(404, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.statusCode());
     }
 }

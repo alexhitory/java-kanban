@@ -10,6 +10,7 @@ import ru.practicum.manager.TaskManager;
 import ru.practicum.model.Task;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -31,9 +32,9 @@ public abstract class BaseHttpHandler implements HttpHandler {
         } catch (TaskIntersectionException e) {
             sendHasInteractions(exchange);
         } catch (JsonSyntaxException | IllegalArgumentException e) {
-            sendResponse(exchange, 500, "{\"error\":\"Invalid request\"}");
+            sendResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "{\"error\":\"Invalid request\"}");
         } catch (Exception e) {
-            sendResponse(exchange, 500, "{\"error\":\"Internal server error\"}");
+            sendResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "{\"error\":\"Internal server error\"}");
         }
     }
 
@@ -45,19 +46,20 @@ public abstract class BaseHttpHandler implements HttpHandler {
     }
 
     protected void sendText(HttpExchange exchange, String text) throws IOException {
-        sendResponse(exchange, 200, text);
+        sendResponse(exchange, HttpURLConnection.HTTP_OK, text);
     }
 
     protected void sendCreated(HttpExchange exchange, String text) throws IOException {
-        sendResponse(exchange, 201, text);
+        sendResponse(exchange, HttpURLConnection.HTTP_CREATED, text);
     }
 
     protected void sendNotFound(HttpExchange exchange, String message) throws IOException {
-        sendResponse(exchange, 404, "{\"error\":\"" + message + "\"}");
+        sendResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "{\"error\":\"" + message + "\"}");
     }
 
     protected void sendHasInteractions(HttpExchange exchange) throws IOException {
-        sendResponse(exchange, 406, "{\"error\":\"Task time intersects with existing task\"}");
+        sendResponse(exchange, HttpURLConnection.HTTP_NOT_ACCEPTABLE,
+                "{\"error\":\"Task time intersects with existing task\"}");
     }
 
     protected void sendResponse(HttpExchange exchange, int statusCode, String text) throws IOException {
